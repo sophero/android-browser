@@ -1,14 +1,19 @@
 package com.dizach.androidbrowser;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,6 +60,39 @@ public class MainActivity extends AppCompatActivity {
                 iconImageView.setImageBitmap(icon);
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // inflate menu
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // wire up the menu buttons
+        switch(item.getItemId()) {
+            case R.id.menu_back:
+                onBackPressed();
+                break;
+            case R.id.menu_forward:
+                onForwardPressed();
+                break;
+            case R.id.menu_refresh:
+                webView.reload();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void onForwardPressed() {
+        if (webView.canGoForward()) {
+            webView.goForward();
+        } else {
+            Toast.makeText(this, "Can't go further!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
