@@ -3,13 +3,16 @@ package com.dizach.androidbrowser;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.DownloadListener;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -82,8 +85,24 @@ public class MainActivity extends AppCompatActivity {
                 iconImageView.setImageBitmap(icon);
             }
         });
+
+        webView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+
+                DownloadManager.Request downloadRequest = new DownloadManager.Request(Uri.parse(url));
+                downloadRequest.allowScanningByMediaScanner();
+                downloadRequest.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
+                DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                downloadManager.enqueue(downloadRequest);
+
+                Toast.makeText(MainActivity.this, "File is downloading", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
+    // "inflate" menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // inflate menu
