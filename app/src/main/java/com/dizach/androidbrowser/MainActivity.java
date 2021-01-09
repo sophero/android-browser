@@ -3,15 +3,18 @@ package com.dizach.androidbrowser;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -20,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar progressBar;
     ImageView iconImageView;
     WebView webView;
+    LinearLayout linearLayoutProgressIcon;
+    String currentURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,12 +34,29 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         iconImageView = findViewById(R.id.iconImageView);
         webView = findViewById(R.id.webViewMain);
+        linearLayoutProgressIcon = findViewById(R.id.linearLayoutProgressIcon);
 
         progressBar.setMax(100);
 
         webView.loadUrl("https://www.google.com");
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient());
+
+        webView.setWebViewClient(new WebViewClient(){
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                // show progress bar while page is loading
+                linearLayoutProgressIcon.setVisibility(View.VISIBLE);
+                super.onPageStarted(view, url, favicon);
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                // hide progress bar once loading is finished
+                linearLayoutProgressIcon.setVisibility(View.GONE);
+                super.onPageFinished(view, url);
+                currentURL = url;
+            }
+        });
 
         // use webchromeclient to add some cool features
         webView.setWebChromeClient(new WebChromeClient(){
@@ -70,9 +92,9 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    // wire up the menu buttons
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // wire up the menu buttons
         switch(item.getItemId()) {
             case R.id.menu_back:
                 onBackPressed();
@@ -82,6 +104,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.menu_refresh:
                 webView.reload();
+                break;
+            case R.id.menu_share:
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, currentURL);
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Copied URL");
+                startActivity(Intent.createChooser(shareIntent, "Share URL"));
                 break;
         }
         return super.onOptionsItemSelected(item);
