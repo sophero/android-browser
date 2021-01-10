@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AndroidBrowser</string>
+    <string name="default_home_page">https://www.google.com</string>
+    <string name="user_set_home_page_key">user_set_home_page</string>
 </resources>

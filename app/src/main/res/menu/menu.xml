@@ -20,6 +20,17 @@
         android:title="Refresh" />
 
     <item
+        android:id="@+id/menu_go_to_home_page"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_baseline_home_24"
+        android:title="Go to Home Page" />
+
+    <item
+        android:id="@+id/menu_set_home_page"
+        android:icon="@drawable/ic_baseline_home_24"
+        android:title="Set Home Page" />
+
+    <item
         android:id="@+id/menu_share"
         android:icon="@drawable/ic_baseline_share_24"
         android:title="Share URL" />

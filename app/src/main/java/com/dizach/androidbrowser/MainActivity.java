@@ -3,11 +3,16 @@ package com.dizach.androidbrowser;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.app.DownloadManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,7 +54,13 @@ public class MainActivity extends AppCompatActivity {
 
         progressBar.setMax(100);
 
-        webView.loadUrl(homePage);
+        // obtain saved data from shared preferences
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        // load home page
+        String defaultHomePage = getResources().getString(R.string.default_home_page);
+        homePage = sharedPref.getString(getString(R.string.user_set_home_page_key), defaultHomePage);
+        goToURL(homePage);
+
         webView.getSettings().setJavaScriptEnabled(true);
 
         webView.setWebViewClient(new WebViewClient(){
@@ -115,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         // set go button event listener
         goButton.setOnClickListener((View v) -> {
             String toURL = URLBar.getText().toString();
-            webView.loadUrl(toURL);
+            goToURL(toURL);
         });
         // want to go to page if user hits enter on onscreen keyboard
         URLBar.setOnKeyListener(new View.OnKeyListener() {
@@ -123,19 +134,25 @@ public class MainActivity extends AppCompatActivity {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
                     String toURL = URLBar.getText().toString();
-                    webView.loadUrl(toURL);
+                    goToURL(toURL);
                     return true;
                 } else {
                     return false;
                 }
             }
         });
+
+    }
+
+    private void goToURL(String toURL) {
+        // check for https:// prefix and add if missing
+        if (!toURL.startsWith("https://")) toURL = "https://" + toURL;
+        webView.loadUrl(toURL);
     }
 
     // "inflate" menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // inflate menu
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.menu, menu);
         return super.onCreateOptionsMenu(menu);
@@ -154,6 +171,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_refresh:
                 webView.reload();
                 break;
+            case R.id.menu_go_to_home_page:
+                goToURL(homePage);
+                break;
+            case R.id.menu_set_home_page:
+                setHomePage();
+                break;
             case R.id.menu_share:
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setType("text/plain");
@@ -163,6 +186,41 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setHomePage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter Home Page URL");
+
+        // Set input with current URL
+        EditText input = new EditText(this);
+        input.setText(currentURL);
+
+        // Specify the type of input expected
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        // Set up the okay/cancel buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                homePage = input.getText().toString();
+
+                // save home page to sharedpreferences
+                SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString(getString(R.string.user_set_home_page_key), homePage);
+                editor.apply();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     private void onForwardPressed() {
