@@ -3,6 +3,7 @@ package com.dizach.androidbrowser;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.Context;
@@ -19,8 +20,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.DownloadListener;
+import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
+import android.webkit.WebHistoryItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -45,7 +49,10 @@ public class MainActivity extends AppCompatActivity {
     String currentURL;
     String homePage = "https://www.google.com/";
     String bookmarksString;
-    ArrayList<String> bookmarks = new ArrayList<String>();
+    ArrayList<String> bookmarks;
+    ArrayList<String> urlHistory;
+    WebBackForwardList history;
+    Activity self = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
                 // update address in URL bar
                 URLBar.setText(url);
                 currentURL = url;
+
+                // hide keyboard
+                hideKeyboard(self);
             }
         });
 
@@ -158,6 +168,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = activity.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
     private void parseBookmarks(String bookmarksString) {
         bookmarks = new ArrayList<String>(Arrays.asList(bookmarksString.split(",")));
     }
@@ -201,6 +222,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_view_bookmarks:
                 displayBookmarks();
                 break;
+            case R.id.menu_view_history:
+                showHistory();
+                break;
             case R.id.menu_share:
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setType("text/plain");
@@ -213,8 +237,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void displayBookmarks() {
-        ListFragment listFragment = new ListFragment(bookmarks, webView);
-        listFragment.show(getSupportFragmentManager(), "LIST_FRAGMENT_TAG");
+        BookmarksListFragment BookmarksListFragment = new BookmarksListFragment(bookmarks);
+        BookmarksListFragment.show(getSupportFragmentManager(), "BOOKMARKS_LIST_FRAGMENT_TAG");
+    }
+
+    public void showHistory() {
+        // get history
+        WebBackForwardList currentList = webView.copyBackForwardList();
+        history = currentList;
+        urlHistory = new ArrayList<String>();
+        int currentSize = currentList.getSize();
+        for(int i = 0; i < currentSize; i++) {
+            WebHistoryItem item = currentList.getItemAtIndex(i);
+            String url = item.getUrl();
+            urlHistory.add(url);
+        }
+        // show history
+        HistoryListFragment HistoryListFragment = new HistoryListFragment(urlHistory);
+        HistoryListFragment.show(getSupportFragmentManager(), "HISTORY_LIST_FRAGMENT_TAG");
     }
 
     private void setHomePage() {
@@ -254,13 +294,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void addToBookmarks(String url) {
         if (bookmarks.contains(url)) {
-            Toast.makeText(this, "URL already added", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Bookmark already added", Toast.LENGTH_SHORT).show();
             return;
         }
 
         // add to bookmarks
         bookmarks.add(url);
-        bookmarksString += "," + url;
+        setBookmarksString();
         Toast.makeText(this, "Added to bookmarks", Toast.LENGTH_SHORT).show();
 
         // save to shared preferences

@@ -1,8 +1,18 @@
 <resources>
-    <string name="app_name">AndroidBrowser</string>
+    <string name="app_name">Android Browser</string>
     <string name="default_home_page">https://www.google.com</string>
     <string name="user_set_home_page_key">user_set_home_page</string>
     <string name="user_bookmarks_key">user_bookmarks</string>
     <string name="default_user_bookmarks" />
     <string name="bookmarks_list_title">Bookmarks (press and hold to delete)</string>
+    <string name="history_list_title">History</string>
+    <string name="back">Back</string>
+    <string name="forward">Forward</string>
+    <string name="refresh">Refresh</string>
+    <string name="go_to_home_page">Go to Home Page</string>
+    <string name="add_to_bookmarks">Add to Bookmarks</string>
+    <string name="view_bookmarks">View Bookmarks</string>
+    <string name="show_history">Show History</string>
+    <string name="set_home_page">Set Home Page</string>
+    <string name="share_URL">Share URL</string>
 </resources>

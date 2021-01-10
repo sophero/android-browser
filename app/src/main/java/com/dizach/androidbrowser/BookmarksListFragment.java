@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -15,15 +14,13 @@ import androidx.fragment.app.DialogFragment;
 
 import java.util.ArrayList;
 
-public class ListFragment extends DialogFragment {
+public class BookmarksListFragment extends DialogFragment {
 
     private ListView listView;
-    private WebView webView;
     private ArrayList<String> bookmarks = new ArrayList<String>();
 
-    public ListFragment(ArrayList<String> bookmarks, WebView webView) {
+    public BookmarksListFragment(ArrayList<String> bookmarks) {
         this.bookmarks = bookmarks;
-        this.webView = webView;
     }
 
     @Override
@@ -49,7 +46,8 @@ public class ListFragment extends DialogFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                Log.d("BOOKMARKS", "onItemClick: " + bookmarks.get(position));
                 // close bookmarks dialog and load clicked url
-                webView.loadUrl(bookmarks.get(position));
+//                webView.loadUrl(bookmarks.get(position));
+                ((MainActivity)getActivity()).goToURL(bookmarks.get(position));
                 dismiss();
             }
         });

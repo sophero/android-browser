@@ -6,43 +6,48 @@
         android:id="@+id/menu_back"
         app:showAsAction="always"
         android:icon="@drawable/ic_baseline_keyboard_arrow_left_24"
-        android:title="Backward" />
+        android:title="@string/back" />
 
     <item
         android:id="@+id/menu_forward"
         app:showAsAction="always"
         android:icon="@drawable/ic_baseline_keyboard_arrow_right_24"
-        android:title="Forward" />
+        android:title="@string/forward" />
 
     <item
         android:id="@+id/menu_refresh"
         android:icon="@drawable/ic_baseline_refresh_24"
-        android:title="Refresh" />
+        android:title="@string/refresh" />
 
     <item
         android:id="@+id/menu_go_to_home_page"
         app:showAsAction="always"
         android:icon="@drawable/ic_baseline_home_24"
-        android:title="Go to Home Page" />
+        android:title="@string/go_to_home_page" />
 
     <item
         android:id="@+id/menu_add_to_bookmarks"
         android:icon="@drawable/ic_baseline_bookmark_24"
-        android:title="Add to Bookmarks" />
+        android:title="@string/add_to_bookmarks" />
 
     <item
         android:id="@+id/menu_view_bookmarks"
         android:icon="@drawable/ic_baseline_bookmarks_24"
-        android:title="View Bookmarks" />
+        android:title="@string/view_bookmarks" />
+
+    <item
+        android:id="@+id/menu_view_history"
+        android:icon="@drawable/ic_baseline_history_24"
+        android:title="@string/show_history" />
 
     <item
         android:id="@+id/menu_set_home_page"
         android:icon="@drawable/ic_baseline_home_24"
-        android:title="Set Home Page" />
+        android:title="@string/set_home_page" />
 
     <item
         android:id="@+id/menu_share"
         android:icon="@drawable/ic_baseline_share_24"
-        android:title="Share URL" />
+        android:title="@string/share_URL" />
 
 </menu>
