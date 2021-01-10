@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,6 +30,10 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     ProgressBar progressBar;
@@ -38,13 +43,17 @@ public class MainActivity extends AppCompatActivity {
     EditText URLBar;
     Button goButton;
     String currentURL;
-    String homePage = "https://www.google.com";
+    String homePage = "https://www.google.com/";
+    String bookmarksString;
+    ArrayList<String> bookmarks = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // set content view
         setContentView(R.layout.activity_main);
 
+        // instantiate layout items
         progressBar = findViewById(R.id.progressBar);
         iconImageView = findViewById(R.id.iconImageView);
         webView = findViewById(R.id.webViewMain);
@@ -56,13 +65,19 @@ public class MainActivity extends AppCompatActivity {
 
         // obtain saved data from shared preferences
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+
         // load home page
         String defaultHomePage = getResources().getString(R.string.default_home_page);
         homePage = sharedPref.getString(getString(R.string.user_set_home_page_key), defaultHomePage);
         goToURL(homePage);
 
-        webView.getSettings().setJavaScriptEnabled(true);
+        // load bookmarks string (URLs separated by ',')
+        String defaultBookmarks = getResources().getString(R.string.default_user_bookmarks);
+        bookmarksString = sharedPref.getString(getString(R.string.user_bookmarks_key), defaultBookmarks);
+        parseBookmarks(bookmarksString); // parse bookmarks
 
+        // enable javascript
+        webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient(){
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -83,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // use webchromeclient to add some cool features
+        // use webchromeclient to add actions based on page loading hooks
         webView.setWebChromeClient(new WebChromeClient(){
 
             @Override
@@ -108,12 +123,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // enable file download
         webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
 
                 DownloadManager.Request downloadRequest = new DownloadManager.Request(Uri.parse(url));
-//                downloadRequest.allowScanningByMediaScanner();
                 downloadRequest.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
                 DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
@@ -141,10 +156,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
-    private void goToURL(String toURL) {
+    private void parseBookmarks(String bookmarksString) {
+        bookmarks = new ArrayList<String>(Arrays.asList(bookmarksString.split(",")));
+    }
+
+    public void goToURL(String toURL) {
         // check for https:// prefix and add if missing
         if (!toURL.startsWith("https://")) toURL = "https://" + toURL;
         webView.loadUrl(toURL);
@@ -177,6 +195,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_set_home_page:
                 setHomePage();
                 break;
+            case R.id.menu_add_to_bookmarks:
+                addToBookmarks(currentURL);
+                break;
+            case R.id.menu_view_bookmarks:
+                displayBookmarks();
+                break;
             case R.id.menu_share:
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setType("text/plain");
@@ -186,6 +210,11 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void displayBookmarks() {
+        ListFragment listFragment = new ListFragment(bookmarks, webView);
+        listFragment.show(getSupportFragmentManager(), "LIST_FRAGMENT_TAG");
     }
 
     private void setHomePage() {
@@ -221,6 +250,50 @@ public class MainActivity extends AppCompatActivity {
         });
 
         builder.show();
+    }
+
+    private void addToBookmarks(String url) {
+        if (bookmarks.contains(url)) {
+            Toast.makeText(this, "URL already added", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // add to bookmarks
+        bookmarks.add(url);
+        bookmarksString += "," + url;
+        Toast.makeText(this, "Added to bookmarks", Toast.LENGTH_SHORT).show();
+
+        // save to shared preferences
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.user_bookmarks_key), bookmarksString);
+        editor.apply();
+    }
+
+    public void removeFromBookmarks(String url) {
+        if (!bookmarks.contains(url)) {
+            Toast.makeText(this, "Bookmark not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // remove from bookmarks
+        bookmarks.remove(url);
+        setBookmarksString();
+        Toast.makeText(this, "Removed from bookmarks", Toast.LENGTH_SHORT).show();
+
+        // save to shared preferences
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.user_bookmarks_key), bookmarksString);
+        editor.apply();
+    }
+
+    private void setBookmarksString() {
+        String newBookmarksString = "";
+        for (String bookmark : bookmarks) {
+            newBookmarksString += bookmark + ",";
+        }
+        bookmarksString = newBookmarksString;
     }
 
     private void onForwardPressed() {

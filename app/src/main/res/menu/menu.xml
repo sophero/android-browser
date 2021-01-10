@@ -26,6 +26,16 @@
         android:title="Go to Home Page" />
 
     <item
+        android:id="@+id/menu_add_to_bookmarks"
+        android:icon="@drawable/ic_baseline_bookmark_24"
+        android:title="Add to Bookmarks" />
+
+    <item
+        android:id="@+id/menu_view_bookmarks"
+        android:icon="@drawable/ic_baseline_bookmarks_24"
+        android:title="View Bookmarks" />
+
+    <item
         android:id="@+id/menu_set_home_page"
         android:icon="@drawable/ic_baseline_home_24"
         android:title="Set Home Page" />

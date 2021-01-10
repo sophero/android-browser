@@ -2,4 +2,7 @@
     <string name="app_name">AndroidBrowser</string>
     <string name="default_home_page">https://www.google.com</string>
     <string name="user_set_home_page_key">user_set_home_page</string>
+    <string name="user_bookmarks_key">user_bookmarks</string>
+    <string name="default_user_bookmarks" />
+    <string name="bookmarks_list_title">Bookmarks (press and hold to delete)</string>
 </resources>
